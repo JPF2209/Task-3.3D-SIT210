@@ -12,9 +12,11 @@ int LED = 8;
 WiFiClient wClient;
 MqttClient mqttClient(wClient);
 
-const char broker[] = "mqtt-dashboard.com";
+const char broker[] = "broker.emqx.io";
 int port = 1883;
-const char subject[] = "SIT210/waves";
+const char pat_subject[] = "SIT210/pat";
+const char waves_subject[] = "SIT210/waves";
+const char message[] = "working";
 
 bool subscribed = false;
 bool pat = false;
@@ -51,6 +53,9 @@ void setup() {
   Serial.println("Connected to MQTT");
   Serial.println();
 
+  
+  mqttClient.subscribe(pat_subject);
+  mqttClient.subscribe(waves_subject);
 }
 
 void loop() {  
@@ -60,29 +65,6 @@ void loop() {
   else{
     led();
   }
-}
-
-void subscribe(){
-  Serial.print("Subscribing to subject: ");
-  Serial.println(subject);
-  Serial.println();
-
-  mqttClient.subscribe(subject);
-
-  Serial.print("Waiting for messages on subject:");
-  Serial.println(subject);
-  Serial.println();
-}
-
-void unsubscribe(){
-  Serial.print("Unsubscribing to subject: ");
-  Serial.println(subject);
-  Serial.println();
-
-  mqttClient.unsubscribe(subject);
-
-  Serial.print("Unsubscribed");
-  Serial.println();
 }
 
 void led(){
@@ -122,7 +104,6 @@ void led(){
     Serial.println();
   }
   subscribed = false;
-  unsubscribe();
 }
 
 void sensor(){
@@ -139,27 +120,23 @@ void sensor(){
   float cm = (time * 0.0343) / 2;
   Serial.print("length from sensor: ");
   Serial.println(cm);
-  if (cm < 25 && cm > 10){    
-    subscribe();
-    mqttClient.beginMessage(subject);
-    mqttClient.println(subject);
+  if (cm < 25 && cm > 10){        
+    pat = false;
+    mqttClient.beginMessage(waves_subject);
+    mqttClient.println(waves_subject);
     mqttClient.print("hello: ");
     mqttClient.endMessage();
     subscribed = true;
     delay(500);
-    mqttClient.println("Hello there");
     pat = false;
   }
   else if (cm < 10){
-    subscribe();
-    mqttClient.beginMessage(subject);
-    mqttClient.println(subject);
+    pat = true;
+    mqttClient.beginMessage(pat_subject);
+    mqttClient.println(pat_subject);
     mqttClient.print("patted: ");
     mqttClient.endMessage();
     subscribed = true;
     delay(500);
-    mqttClient.println("Hello there");
-    pat = true;
   }
-  // Serial.println();
 }
