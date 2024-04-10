@@ -1,8 +1,8 @@
 #include <WiFiNINA.h>
 #include <ArduinoMqttClient.h>
 
-char ssid[] = "TelstraE78C95";
-char pass[] = "mnnu9vh7x7";
+char ssid[] = "Your WiFi Name";
+char pass[] = "Your WiFi password";
 
 
 int echopin = 2;
